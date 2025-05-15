@@ -1,0 +1,123 @@
+/* Mobile Styles - Optimized for better article browsing */
+
+/* Card Layout */
+@media (max-width: 768px) {
+  /* Container tweaks */
+  .container {
+    width: 95%;
+    padding: 0 8px;
+  }
+
+  /* Article Cards - Horizontal Layout */
+  .articles-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 15px 0;
+  }
+
+  .article-card {
+    display: flex !important;
+    flex-direction: row !important;
+    height: 130px !important;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+    border: none;
+  }
+
+  .article-image-wrapper {
+    width: 40% !important;
+    min-width: 120px;
+    height: 130px !important;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .article-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .article-content {
+    width: 60% !important;
+    padding: 10px 15px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .article-content h3 {
+    font-size: 16px !important;
+    line-height: 1.3;
+    margin: 0 0 5px 0 !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .article-excerpt {
+    display: none !important;
+  }
+
+  .article-date {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 4px;
+  }
+
+  .read-more {
+    font-size: 14px;
+    color: #FF7F50;
+    font-weight: 500;
+    margin-top: auto;
+  }
+
+  .article-location {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    padding: 20px 8px 6px;
+    color: white;
+    font-size: 12px;
+  }
+
+  /* Simple animation for cards */
+  .article-card {
+    animation: fadeIn 0.3s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0.7; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Articles per page indicator */
+  .pagination {
+    margin: 15px 0;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pagination .btn {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  /* Force image cover */
+  .article-image-wrapper img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+} 
