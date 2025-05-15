@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Timeless Echoes - Preserving Indian Culture{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Preserving India's Rich Cultural Heritage</h1>
+        <p>Share unique traditions, stories, and cultural elements from your native place</p>
+        {% if current_user.is_authenticated %}
+            <button id="exploreBtn" class="btn btn-primary" onclick="location.href='#articles'">Explore Stories</button>
+        {% else %}
+            <div class="hero-buttons">
+                <button id="loginBtn" class="btn btn-outline" onclick="location.href='{{ url_for('login') }}'">Login</button>
+                <button id="signupBtn" class="btn btn-primary" onclick="location.href='{{ url_for('register') }}'">Sign Up</button>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Main Content -->
+<main>
+    <!-- About Section - Improved styling -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2>About Timeless Echoes</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>Timeless Echoes is a platform dedicated to preserving India's diverse cultural heritage through storytelling and community engagement.</p>
+                    <p>Our mission is to document and celebrate the unique traditions, customs, art forms, and cultural practices from every corner of India.</p>
+                    <p>Join our community to share stories from your native place and discover the rich tapestry of Indian culture.</p>
+                </div>
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-pen"></i>
+                        </div>
+                        <h3>Share Your Heritage</h3>
+                        <p>Publish articles about unique cultural elements from your native place.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3>Explore by Region</h3>
+                        <p>Discover traditions from specific states, districts, and villages across India.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>Engage with Community</h3>
+                        <p>Comment on articles and connect with fellow culture enthusiasts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Articles Section -->
+    <section id="articles" class="articles-section">
+        <div class="container">
+            <h2>Discover Cultural Treasures</h2>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <form action="{{ url_for('index') }}" method="get" class="filter-form">
+                    <div class="filter-wrapper">
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <select name="state" id="state">
+                                <option value="">All States</option>
+                                {% for state in states %}
+                                    <option value="{{ state }}" {% if selected_state == state %}selected{% endif %}>{{ state }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="district">District</label>
+                            <select name="district" id="district">
+                                <option value="">All Districts</option>
+                                {% if districts %}
+                                    {% for district in districts %}
+                                        <option value="{{ district }}" {% if selected_district == district %}selected{% endif %}>{{ district }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="village">Village</label>
+                            <select name="village" id="village">
+                                <option value="">All Villages</option>
+                                {% if villages %}
+                                    {% for village in villages %}
+                                        <option value="{{ village }}" {% if selected_village == village %}selected{% endif %}>{{ village }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-buttons">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                            <a href="{{ url_for('index') }}" class="btn btn-secondary">Reset</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Articles Grid -->
+            {% if articles.items %}
+            <div class="articles-grid">
+                {% for article in articles.items %}
+                    <div class="article-card">
+                        <div class="article-image-wrapper">
+                            {% if article.image_path %}
+                                <img src="{{ url_for('static', filename=article.image_path) }}" alt="{{ article.title }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/default.jpg') }}" alt="Default Image">
+                            {% endif %}
+                            <div class="article-location">
+                                <i class="fas fa-map-marker-alt"></i> {{ article.state }}, {{ article.district }}
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <div class="article-date">
+                                <i class="fas fa-calendar"></i> {{ article.timestamp.strftime('%d %b, %Y') }}
+                            </div>
+                            <h3><a href="{{ url_for('view_article', article_id=article.id) }}">{{ article.title }}</a></h3>
+                            <p class="article-excerpt">{{ article.description[:150] }}{% if article.description|length > 150 %}...{% endif %}</p>
+                            <a href="{{ url_for('view_article', article_id=article.id) }}" class="read-more">Read More</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination">
+                {% if articles.has_prev %}
+                    <a href="{{ url_for('index', page=articles.prev_num, state=selected_state, district=selected_district, village=selected_village) }}" class="btn btn-outline">Previous</a>
+                {% else %}
+                    <button class="btn btn-outline" disabled>Previous</button>
+                {% endif %}
+                <span>Page {{ articles.page }} of {{ articles.pages }}</span>
+                {% if articles.has_next %}
+                    <a href="{{ url_for('index', page=articles.next_num, state=selected_state, district=selected_district, village=selected_village) }}" class="btn btn-outline">Next</a>
+                {% else %}
+                    <button class="btn btn-outline" disabled>Next</button>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="no-articles">
+                <p>No articles found. Be the first to share a cultural story!</p>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('create_article') }}" class="btn btn-primary">Create Article</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">Login to Share</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Why Share Your Story Section - Modified -->
+    <section class="featured-section">
+        <div class="container">
+            <h2>Why Share Your Story?</h2>
+            <div class="featured-content">
+                <div class="featured-image">
+                    <img src="{{ url_for('static', filename='uploads/cultural-heritage.jpg') }}" alt="Cultural Heritage" id="whyimage">
+                </div>
+                <div class="featured-text">
+                    <h3>Preserve Cultural Knowledge</h3>
+                    <p>Every village, every district, and every region of India has its own unique cultural identity with traditions, festivals, crafts, and stories that have been passed down through generations.</p>
+                    <p>By documenting these cultural elements, we help preserve them for future generations and create a living archive of India's diverse heritage.</p>
+                    <p>Your stories matter. Your heritage matters. Together, we can ensure these timeless echoes of culture continue to resonate.</p>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('create_article') }}" class="btn btn-primary">Share Your Story</a>
+                    {% else %}
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">Join Our Community</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stateSelect = document.getElementById('state');
+        const districtSelect = document.getElementById('district');
+        const villageSelect = document.getElementById('village');
+
+        stateSelect.addEventListener('change', function() {
+            const state = this.value;
+            
+            // Clear district and village dropdowns
+            districtSelect.innerHTML = '<option value="">All Districts</option>';
+            villageSelect.innerHTML = '<option value="">All Villages</option>';
+            
+            if (state) {
+                fetch(`/get_districts?state=${state}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.districts.forEach(district => {
+                            const option = document.createElement('option');
+                            option.value = district;
+                            option.textContent = district;
+                            districtSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+
+        districtSelect.addEventListener('change', function() {
+            const district = this.value;
+            
+            // Clear village dropdown
+            villageSelect.innerHTML = '<option value="">All Villages</option>';
+            
+            if (district) {
+                fetch(`/get_villages?district=${district}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.villages.forEach(village => {
+                            const option = document.createElement('option');
+                            option.value = village;
+                            option.textContent = village;
+                            villageSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    });
+</script>
+{% endblock %}

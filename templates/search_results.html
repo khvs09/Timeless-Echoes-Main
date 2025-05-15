@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - Timeless Echoes{% endblock %}
+
+{% block content %}
+<section class="search-results-section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Search Results for "{{ query }}"</h2>
+            <div class="heading-underline"></div>
+        </div>
+        
+        <div class="search-results-count">
+            <p>Found {{ search_results.total }} result{% if search_results.total != 1 %}s{% endif %}</p>
+        </div>
+        
+        {% if search_results.items %}
+            <div class="articles-grid">
+                {% for article in search_results.items %}
+                    <div class="article-card">
+                        <div class="article-image-wrapper">
+                            {% if article.image_path %}
+                                <img src="{{ url_for('static', filename=article.image_path) }}" alt="{{ article.title }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/default.jpg') }}" alt="Default Image">
+                            {% endif %}
+                            <div class="article-location">
+                                <i class="fas fa-map-marker-alt"></i> {{ article.state }}, {{ article.district }}
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <div class="article-date">
+                                <i class="fas fa-calendar"></i> {{ article.timestamp.strftime('%d %b, %Y') }}
+                            </div>
+                            <h3><a href="{{ url_for('view_article', article_id=article.id) }}">{{ article.title }}</a></h3>
+                            <p class="article-excerpt">{{ article.description[:150] }}{% if article.description|length > 150 %}...{% endif %}</p>
+                            <a href="{{ url_for('view_article', article_id=article.id) }}" class="read-more">Read More</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination">
+                {% if search_results.has_prev %}
+                    <a href="{{ url_for('search', query=query, page=search_results.prev_num) }}" class="btn btn-outline">Previous</a>
+                {% else %}
+                    <button class="btn btn-outline" disabled>Previous</button>
+                {% endif %}
+                <span>Page {{ search_results.page }} of {{ search_results.pages }}</span>
+                {% if search_results.has_next %}
+                    <a href="{{ url_for('search', query=query, page=search_results.next_num) }}" class="btn btn-outline">Next</a>
+                {% else %}
+                    <button class="btn btn-outline" disabled>Next</button>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="no-articles">
+                <p>No articles found for "{{ query }}". Try different keywords or explore our existing stories.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Stories</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

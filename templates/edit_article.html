@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Article - Timeless Echoes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/map_styles.css') }}" />
+{% endblock %}
+
+{% block content %}
+<section class="create-article-section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Edit Your Cultural Story</h2>
+            <div class="heading-underline"></div>
+        </div>
+        
+        <div class="form-container">
+            <form method="post" action="" enctype="multipart/form-data" class="article-form">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.title.label }}
+                    {{ form.title(class="form-control", placeholder="Enter a descriptive title for your story") }}
+                    {% for error in form.title.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.description.label }}
+                    {{ form.description(class="form-control", rows=10, placeholder="Share your story in detail...") }}
+                    {% for error in form.description.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group">
+                    <div class="image-upload-container">
+                        <div class="image-upload-label">
+                            {{ form.image.label }}
+                            <small class="form-text">Upload a new image or leave blank to keep the existing one</small>
+                        </div>
+                        <div class="image-upload-input">
+                            {{ form.image(class="form-control-file") }}
+                            {% for error in form.image.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                            
+                            <div class="image-preview-container">
+                                {% if article.image_path %}
+                                <div class="current-image">
+                                    <h4>Current Image:</h4>
+                                    <img src="{{ url_for('static', filename=article.image_path) }}" alt="Current Image" style="max-width: 200px; margin-top: 10px;">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="location-search-container">
+                    <div class="form-group">
+                        {{ form.location_search.label }}
+                        {{ form.location_search(class="form-control", placeholder="Search for a location", id="location-search") }}
+                    </div>
+                </div>
+                
+                <div class="map-container">
+                    <label>Select Story Location on Map</label>
+                    <div id="map-container"></div>
+                    {{ form.latitude(id="latitude") }}
+                    {{ form.longitude(id="longitude") }}
+                </div>
+                
+                <div class="location-fields">
+                    <h3>Location Information</h3>
+                    <div class="location-grid">
+                        <div class="form-group">
+                            {{ form.state.label }}
+                            {{ form.state(class="form-control", placeholder="State", id="state") }}
+                            {% for error in form.state.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.district.label }}
+                            {{ form.district(class="form-control", placeholder="District", id="district") }}
+                            {% for error in form.district.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.village.label }}
+                            {{ form.village(class="form-control", placeholder="Village", id="village") }}
+                            {% for error in form.village.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.address.label }}
+                            {{ form.address(class="form-control", placeholder="Detailed address (optional)", id="address") }}
+                            {% for error in form.address.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                            <small class="form-text">Provide specific location details (optional)</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group submit-group">
+                    {{ form.submit(class="btn btn-primary") }}
+                    <a href="{{ url_for('view_article', article_id=article.id) }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/map_scripts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image preview
+        const imageInput = document.getElementById('image');
+        const previewContainer = document.querySelector('.image-preview-container');
+        const currentImage = previewContainer.querySelector('.current-image');
+        
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Hide current image if it exists
+                        if (currentImage) {
+                            currentImage.style.display = 'none';
+                        }
+                        
+                        // Create new preview
+                        const preview = document.createElement('div');
+                        preview.className = 'new-image-preview';
+                        
+                        const previewTitle = document.createElement('h4');
+                        previewTitle.textContent = 'New Image:';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Preview';
+                        img.style.maxWidth = '200px';
+                        img.style.marginTop = '10px';
+                        
+                        preview.appendChild(previewTitle);
+                        preview.appendChild(img);
+                        
+                        // Remove previous new preview if exists
+                        const oldPreview = previewContainer.querySelector('.new-image-preview');
+                        if (oldPreview) {
+                            previewContainer.removeChild(oldPreview);
+                        }
+                        
+                        previewContainer.appendChild(preview);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

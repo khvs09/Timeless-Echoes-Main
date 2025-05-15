@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} - Timeless Echoes{% endblock %}
+
+{% block extra_css %}
+{% if article.latitude and article.longitude %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/map_styles.css') }}" />
+{% endif %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/translation.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+<style>
+.article-share {
+    margin: 30px 0;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: left;
+}
+.share-buttons {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 10px;
+}
+.share-button.whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #25D366;
+    color: #fff;
+    font-size: 2rem;
+    box-shadow: 0 4px 16px rgba(37,211,102,0.15);
+    text-decoration: none;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    border: none;
+}
+.share-button.whatsapp i {
+    font-size: 2rem;
+}
+.share-button.whatsapp:hover, .share-button.whatsapp:focus {
+    background-color: #128C7E;
+    color: #fff;
+    transform: translateY(-2px) scale(1.08);
+    box-shadow: 0 8px 24px rgba(18,140,126,0.18);
+}
+.share-label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="article-detail">
+    <div class="container">
+        <div class="article-breadcrumb">
+            <a href="{{ url_for('index') }}">Home</a> <i class="fas fa-chevron-right"></i> 
+            <a href="#" onclick="window.history.back(); return false;">Stories</a> <i class="fas fa-chevron-right"></i> 
+            <span>{{ article.title }}</span>
+        </div>
+        
+        <div class="article-header">
+            <div class="article-title-section">
+                <h1>{{ article.title }}</h1>
+            </div>
+            <div class="article-meta" style="justify-content: center; text-align: center;">
+                <span class="author"><i class="fas fa-user"></i> {{ article.author.username }}</span>
+                <span class="location"><i class="fas fa-map-marker-alt"></i> {{ article.state }}, {{ article.district }}, {{ article.village }}</span>
+                <span class="date"><i class="fas fa-calendar"></i> {{ article.timestamp.strftime('%d %b, %Y') }}</span>
+            </div>
+            <div class="translate-row">
+                <button class="btn translate" id="translateBtn" type="button">
+                    <i class="fas fa-language"></i> Translate
+                </button>
+                {% if current_user.is_authenticated and article.user_id == current_user.id %}
+                <a href="{{ url_for('edit_article', article_id=article.id) }}" class="btn edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <form action="{{ url_for('delete_article', article_id=article.id) }}" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn delete" onclick="return confirm('Are you sure you want to delete this article?')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="article-body">
+            {% if article.image_path %}
+                <div class="article-image-large">
+                    <img src="{{ url_for('static', filename=article.image_path) }}" alt="{{ article.title }}">
+                </div>
+            {% endif %}
+            
+            <div class="article-location-card">
+                <div class="location-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="location-details">
+                    <h3>Story Location</h3>
+                    <p><strong>State:</strong> {{ article.state }}</p>
+                    <p><strong>District:</strong> {{ article.district }}</p>
+                    <p><strong>Village:</strong> {{ article.village }}</p>
+                    {% if article.address %}
+                        <p><strong>Address:</strong> {{ article.address }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if article.latitude and article.longitude %}
+            <div class="article-map-section">
+                <h3>Story Location on Map</h3>
+                <div id="article-map" 
+                     data-latitude="{{ article.latitude }}" 
+                     data-longitude="{{ article.longitude }}"
+                     data-title="{{ article.title }}"
+                     data-location="{{ article.state }}, {{ article.district }}, {{ article.village }}">
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="article-text" data-original-text="{{ article.description|better_nl2br|safe }}">
+                {{ article.description|better_nl2br|safe }}
+            </div>
+            
+            <div class="article-share">
+                <h4>Share this story</h4>
+                <div class="share-buttons">
+                    <a href="#" class="share-button whatsapp" id="whatsappShareBtn" title="Share on WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comments-section">
+            <div class="section-heading">
+                <h3>Comments ({{ article.comments.count() }})</h3>
+                <div class="heading-underline"></div>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+                <div class="comment-form-container">
+                    <h4>Add a Comment</h4>
+                    <form action="{{ url_for('add_comment', article_id=article.id) }}" method="post" class="comment-form">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group">
+                            {{ form.body(class="form-control", placeholder="Share your thoughts...") }}
+                            {% for error in form.body.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                <div class="comment-login-prompt">
+                    <p><a href="{{ url_for('login') }}">Login</a> to leave a comment.</p>
+                </div>
+            {% endif %}
+            
+            <div class="comments-list">
+                {% if article.comments.count() > 0 %}
+                    {% for comment in article.comments.order_by(Comment.timestamp.desc()).all() %}
+                        <div class="comment">
+                            <div class="comment-avatar">
+                                <div class="avatar-placeholder">
+                                    {{ comment.author.username[0].upper() }}
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="comment-author">{{ comment.author.username }}</span>
+                                    <span class="comment-date">{{ comment.timestamp.strftime('%d %b, %Y %H:%M') }}</span>
+                                </div>
+                                <div class="comment-body">
+                                    {{ comment.body|better_nl2br|safe }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-comments">
+                        <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="article-nav">
+            <a href="{{ url_for('index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Stories
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% if article.latitude and article.longitude %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/map_scripts.js') }}"></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/translation.js') }}"></script>
+<script>
+document.getElementById('whatsappShareBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    const shareText = `{{ article.title }} - {{ request.url }}`;
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ article.title }}',
+            text: '{{ article.title }}',
+            url: '{{ request.url }}'
+        });
+    } else {
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+        window.open(waUrl, '_blank');
+    }
+});
+</script>
+{% endblock %}

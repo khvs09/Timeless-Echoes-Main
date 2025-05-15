@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Create Article - Timeless Echoes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/map_styles.css') }}" />
+{% endblock %}
+
+{% block content %}
+<section class="create-article-section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Share Your Cultural Story</h2>
+            <div class="heading-underline"></div>
+        </div>
+        
+        <div class="form-container">
+            <form method="post" action="" enctype="multipart/form-data" class="article-form">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.title.label }}
+                    {{ form.title(class="form-control", placeholder="Enter a descriptive title for your story") }}
+                    {% for error in form.title.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.description.label }}
+                    {{ form.description(class="form-control", rows=10, placeholder="Share your story in detail...") }}
+                    {% for error in form.description.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group">
+                    <div class="image-upload-container">
+                        <div class="image-upload-label">
+                            {{ form.image.label }}
+                            <small class="form-text">Upload an image that represents your story</small>
+                        </div>
+                        <div class="image-upload-input">
+                            {{ form.image(class="form-control-file") }}
+                            {% for error in form.image.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map Section -->
+                <div class="map-section">
+                    <div class="map-section-header">
+                        <h3><i class="fas fa-map-marker-alt"></i> Story Location</h3>
+                        <p>Help others discover where your story takes place</p>
+                    </div>
+                    
+                    <div class="map-instructions">
+                        <p><i class="fas fa-info-circle"></i> Search for a location or click on the map to set the exact position of your story.</p>
+                    </div>
+                    
+                    <div class="location-search-container">
+                        <div class="form-group">
+                            {{ form.location_search.label }}
+                            {{ form.location_search(class="form-control", placeholder="Search for a location (e.g., city, landmark, address)", id="location-search") }}
+                            <div class="search-loading">Searching...</div>
+                            <div class="search-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="map-container">
+                        <div id="map-container"></div>
+                        <button type="button" class="clear-location-btn" style="display: none;">
+                            <i class="fas fa-times"></i> Clear Location
+                        </button>
+                        {{ form.latitude(id="latitude") }}
+                        {{ form.longitude(id="longitude") }}
+                        <div class="map-status"></div>
+                    </div>
+                    
+                    <div class="location-fields">
+                        <h3>Location Details</h3>
+                        <div class="location-grid">
+                            <div class="form-group">
+                                {{ form.state.label }}
+                                {{ form.state(class="form-control", placeholder="State", id="state") }}
+                                {% for error in form.state.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="form-group">
+                                {{ form.district.label }}
+                                {{ form.district(class="form-control", placeholder="District", id="district") }}
+                                {% for error in form.district.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="form-group">
+                                {{ form.village.label }}
+                                {{ form.village(class="form-control", placeholder="Village", id="village") }}
+                                {% for error in form.village.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="form-group">
+                                {{ form.address.label }}
+                                {{ form.address(class="form-control", placeholder="Detailed address (optional)", id="address") }}
+                                {% for error in form.address.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                                <small class="form-text">Provide specific location details (optional)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group submit-group">
+                    {{ form.submit(class="btn btn-primary") }}
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/map_scripts.js') }}"></script>
+{% endblock %}
