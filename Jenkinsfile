@@ -17,6 +17,7 @@ pipeline {
                 if exist requirements.txt (
                     python -m pip install -r requirements.txt
                 )
+                pip install pytest
                 '''
             }
         }
@@ -25,7 +26,7 @@ pipeline {
             steps {
                 bat '''
                 call venv\\Scripts\\activate
-                python -m pytest
+                pytest
                 '''
             }
         }
