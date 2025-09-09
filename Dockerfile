@@ -1,9 +1,8 @@
 # Use Python base image
 FROM python:3.10-slim
 
-# Install system dependencies (for psycopg2, etc.)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends build-essential netcat && \
+    apt-get install -y --no-install-recommends build-essential netcat-openbsd && \
     rm -rf /var/lib/apt/lists/*
 
 # Create working directory
