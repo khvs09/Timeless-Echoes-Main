@@ -27,6 +27,7 @@ pipeline {
             steps {
                 bat '''
                 call venv\\Scripts\\activate
+                set PYTHONUTF8=1
                 python -m pytest -s
                 '''
             }
