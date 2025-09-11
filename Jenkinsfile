@@ -13,11 +13,20 @@ pipeline {
                 bat '''
                 python -m venv venv
                 call venv\\Scripts\\activate
-                python -m pip install --upgrade pip
+
+                REM Ensure pip exists inside venv
+                python -m ensurepip --upgrade
+
+                REM Upgrade pip + essentials
+                python -m pip install --upgrade pip setuptools wheel
+
+                REM Install project requirements if present
                 if exist requirements.txt (
                     python -m pip install -r requirements.txt
                 )
-                pip install pytest
+
+                REM Install pytest explicitly
+                python -m pip install pytest
                 '''
             }
         }
