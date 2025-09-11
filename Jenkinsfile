@@ -13,11 +13,12 @@ pipeline {
                 bat '''
                 python -m venv venv
                 call venv\\Scripts\\activate
-                python -m pip install --upgrade pip
+                python -m ensurepip --upgrade
+                python -m pip install --upgrade pip setuptools wheel
                 if exist requirements.txt (
                     python -m pip install -r requirements.txt
                 )
-                pip install pytest
+                python -m pip install pytest
                 '''
             }
         }
@@ -26,7 +27,7 @@ pipeline {
             steps {
                 bat '''
                 call venv\\Scripts\\activate
-                pytest
+                python -m pytest -s
                 '''
             }
         }
