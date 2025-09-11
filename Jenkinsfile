@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/khvs09/Timeless-Echoes-Main.git'
+                git branch: 'patch-1', url: 'https://github.com/BS-Pranav/Timeless-Echoes-Main.git'
             }
         }
 
