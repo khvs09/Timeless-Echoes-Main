@@ -26,7 +26,7 @@ pipeline {
             steps {
                 bat '''
                 call venv\\Scripts\\activate
-                pytest
+                pytest -s
                 '''
             }
         }
