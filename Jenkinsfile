@@ -15,18 +15,21 @@ pipeline {
                 REM Create virtual environment
                 python -m venv venv
 
-                REM Ensure pip exists
-                venv\\Scripts\\python.exe -m ensurepip --upgrade
+                REM Download get-pip.py to fix broken pip
+                curl -sSLo get-pip.py https://bootstrap.pypa.io/get-pip.py
 
-                REM Force reinstall pip, setuptools, wheel to fix broken pip
-                venv\\Scripts\\python.exe -m pip install --upgrade --force-reinstall pip setuptools wheel
+                REM Install pip into the venv
+                venv\\Scripts\\python.exe get-pip.py
 
-                REM Install requirements if available
+                REM Upgrade pip, setuptools, wheel
+                venv\\Scripts\\python.exe -m pip install --upgrade pip setuptools wheel
+
+                REM Install project requirements if present
                 if exist requirements.txt (
                     venv\\Scripts\\python.exe -m pip install -r requirements.txt
                 )
 
-                REM Ensure pytest is installed
+                REM Install pytest explicitly
                 venv\\Scripts\\python.exe -m pip install pytest
                 '''
             }
