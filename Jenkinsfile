@@ -38,7 +38,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                venv\\Scripts\\pytest
+                REM Run pytest with unbuffered output so console shows print() statements
+                venv\\Scripts\\python.exe -u -m pytest -s -v
                 '''
             }
         }
