@@ -12,13 +12,20 @@ pipeline {
             steps {
                 bat '''
                 python -m venv venv
-                call venv\\Scripts\\activate
-                python -m ensurepip --upgrade
-                python -m pip install --upgrade pip setuptools wheel
+
+                REM Ensure pip exists
+                venv\\Scripts\\python.exe -m ensurepip --upgrade
+
+                REM Upgrade pip and essentials
+                venv\\Scripts\\python.exe -m pip install --upgrade pip setuptools wheel
+
+                REM Install requirements if available
                 if exist requirements.txt (
-                    python -m pip install -r requirements.txt
+                    venv\\Scripts\\python.exe -m pip install -r requirements.txt
                 )
-                python -m pip install pytest
+
+                REM Install pytest explicitly
+                venv\\Scripts\\python.exe -m pip install pytest
                 '''
             }
         }
@@ -26,9 +33,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                call venv\\Scripts\\activate
                 set PYTHONUTF8=1
-                python -m pytest -s
+                venv\\Scripts\\python.exe -m pytest -s
                 '''
             }
         }
