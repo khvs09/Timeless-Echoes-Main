@@ -4,27 +4,29 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'patch-1', url: 'https://github.com/BS-Pranav/Timeless-Echoes-Main.git'
+                git branch: 'patch-1',
+                    url: 'https://github.com/BS-Pranav/Timeless-Echoes-Main.git'
             }
         }
 
         stage('Setup Python Env') {
             steps {
                 bat '''
+                REM Create virtual environment
                 python -m venv venv
 
                 REM Ensure pip exists
                 venv\\Scripts\\python.exe -m ensurepip --upgrade
 
-                REM Upgrade pip and essentials
-                venv\\Scripts\\python.exe -m pip install --upgrade pip setuptools wheel
+                REM Force reinstall pip, setuptools, wheel to fix broken pip
+                venv\\Scripts\\python.exe -m pip install --upgrade --force-reinstall pip setuptools wheel
 
                 REM Install requirements if available
                 if exist requirements.txt (
                     venv\\Scripts\\python.exe -m pip install -r requirements.txt
                 )
 
-                REM Install pytest explicitly
+                REM Ensure pytest is installed
                 venv\\Scripts\\python.exe -m pip install pytest
                 '''
             }
@@ -33,10 +35,21 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                set PYTHONUTF8=1
-                venv\\Scripts\\python.exe -m pytest -s
+                venv\\Scripts\\pytest
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+        success {
+            echo '✅ Tests passed successfully!'
+        }
+        failure {
+            echo '❌ Pipeline failed.'
         }
     }
 }
