@@ -133,9 +133,7 @@ docker run -p 5000:5000 timeless-echoes
 
 ---
 
-## 👨‍💻 Author
 
-Built by [khvs09](https://github.com/khvs09)
 
 ---
 
